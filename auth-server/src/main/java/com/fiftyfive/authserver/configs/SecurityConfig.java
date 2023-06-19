@@ -1,9 +1,7 @@
 package com.fiftyfive.authserver.configs;
 
-import jakarta.servlet.ServletException;
 import org.keycloak.adapters.springsecurity.KeycloakConfiguration;
 import org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationProvider;
-import org.keycloak.adapters.springsecurity.authentication.KeycloakLogoutHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -14,7 +12,6 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
-import org.springframework.web.reactive.function.client.WebClient;
 
 @KeycloakConfiguration
 public class SecurityConfig {
@@ -25,7 +22,6 @@ public class SecurityConfig {
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
 
-        System.out.println("Calling --------------->flow1");
         KeycloakAuthenticationProvider keycloakAuthenticationProvider
                 = new KeycloakAuthenticationProvider();
         keycloakAuthenticationProvider.setGrantedAuthoritiesMapper(
@@ -40,13 +36,13 @@ public class SecurityConfig {
      */
     @Bean
     public SessionAuthenticationStrategy sessionAuthenticationStrategy() {
-        System.out.println("Calling --------------->flow2");
+
         return new RegisterSessionAuthenticationStrategy(new SessionRegistryImpl());
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        System.out.println("Calling --------------->flow3");
+
         JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(new KeycloakRoleConverter());
 
@@ -57,18 +53,6 @@ public class SecurityConfig {
         http.oauth2ResourceServer(httpSecurityOAuth2ResourceServerConfigurer ->
                 httpSecurityOAuth2ResourceServerConfigurer.jwt(jwtConfigurer
                         -> jwtConfigurer.jwtAuthenticationConverter(jwtAuthenticationConverter)));
-        http.logout(logoutConfigurer ->
-
-                logoutConfigurer.logoutUrl("/auth/logout/")
-                        .invalidateHttpSession(true)
-                        .addLogoutHandler((request, response, auth) -> {
-                    try {
-                        request.logout();
-                    } catch (ServletException e) {
-                        System.out.println(e.getMessage());
-                    }
-                })
-        );
         return http.build();
     }
 
