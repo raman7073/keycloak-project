@@ -18,7 +18,7 @@ public class AuthController {
     @Autowired
     private AuthService authService;
     private final String LOGIN = "/login";
-    private final String LOGOUT = "/login";
+    private final String LOGOUT = "/logout";
     private final String REFRESH_TOKEN = "refresh-token";
 
     @PostMapping(LOGIN)
