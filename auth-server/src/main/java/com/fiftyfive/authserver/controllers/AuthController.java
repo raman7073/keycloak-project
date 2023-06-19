@@ -1,39 +1,37 @@
 package com.fiftyfive.authserver.controllers;
 
-import com.fiftyfive.authserver.dtos.*;
+import com.fiftyfive.authserver.dtos.LoginDTO;
+import com.fiftyfive.authserver.dtos.LoginResponseDTO;
+import com.fiftyfive.authserver.dtos.Response;
 import com.fiftyfive.authserver.services.AuthService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
+@RequiredArgsConstructor
 public class AuthController {
     @Autowired
     private AuthService authService;
+    private final String LOGIN = "/login";
+    private final String LOGOUT = "/login";
+    private final String REFRESH_TOKEN = "refresh-token";
 
-    @PostMapping("/login")
-    public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginDTO loginDTO) {
+    @PostMapping(LOGIN)
+    public ResponseEntity<LoginResponseDTO> login(@RequestBody @Valid LoginDTO loginDTO) {
 
         LoginResponseDTO loginResponseDTO = authService.login(loginDTO);
         return new ResponseEntity<>(loginResponseDTO, HttpStatus.OK);
     }
 
-    @PostMapping("/logout")
-    public ResponseEntity<Response> logout(@RequestBody TokenDTO tokenDTO) {
+    @PostMapping(LOGOUT)
+    public ResponseEntity<Response> logout(@RequestHeader(REFRESH_TOKEN) String refreshToken) {
 
-        Response response = authService.logout(tokenDTO);
+        Response response = authService.logout(refreshToken);
         return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @PostMapping("/introspect")
-    public ResponseEntity<IntrospectResponse> introspect(@RequestBody TokenDTO token) {
-
-        IntrospectResponse introspectResponse = authService.introspect(token);
-        return new ResponseEntity<>(introspectResponse, HttpStatus.OK);
     }
 }

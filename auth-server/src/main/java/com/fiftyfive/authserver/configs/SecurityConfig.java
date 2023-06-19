@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.authority.mapping.SimpleAuthorityMapper;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
@@ -44,11 +45,9 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
-        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(new KeycloakRoleConverter());
-
-        http.csrf(httpSecurityCsrfConfigurer -> httpSecurityCsrfConfigurer.disable());
-        http.cors(httpSecurityCorsConfigurer -> httpSecurityCorsConfigurer.disable());
-        http.authorizeHttpRequests(requests -> requests.requestMatchers("/auth/**").permitAll()
+        http.csrf(AbstractHttpConfigurer::disable);
+        http.cors(AbstractHttpConfigurer::disable);
+        http.authorizeHttpRequests(requests -> requests.requestMatchers("/auth/login").permitAll()
                 .anyRequest().authenticated());
         http.oauth2ResourceServer(httpSecurityOAuth2ResourceServerConfigurer ->
                 httpSecurityOAuth2ResourceServerConfigurer.jwt(jwtConfigurer

@@ -1,9 +1,10 @@
 package com.fiftyfive.authserver.services.Impl;
 
 import com.fiftyfive.authserver.dtos.*;
-import com.fiftyfive.authserver.exceptions.InvalidLoginException;
+import com.fiftyfive.authserver.exceptions.InvalidUserNamePasswordException;
 import com.fiftyfive.authserver.exceptions.LogoutFailureException;
 import com.fiftyfive.authserver.services.AuthService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -16,22 +17,39 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import static com.fiftyfive.authserver.commons.Constants.*;
 
-
+@RequiredArgsConstructor
 @Service
 public class AuthServiceImpl implements AuthService {
 
     @Autowired
     private WebClient webClient;
-    @Value(CLIENT_ID_PROP)
+
+    @Value("${spring.security.oauth2.client.registration.oauth2-client-credentials.client-id}")
     private String clientId;
 
-    @Value(CLIENT_SECRET_PROP)
+    @Value("${spring.security.oauth2.client.registration.oauth2-client-credentials.client-secret}")
     private String clientSecret;
-    @Value(GRANT_TYPE_PROP)
+
+    @Value("${spring.security.oauth2.client.registration.oauth2-client-credentials.authorization-grant-type}")
     private String grantType;
 
+    @Value("${spring.security.oauth2.client.provider.keycloak.token-uri}")
+    private String loginUri;
+
+    @Value("${spring.security.oauth2.client.provider.keycloak.end-session-endpoint}")
+    private String logoutUri;
+    private final String CLIENT_ID = "client_id";
+    private final String CLIENT_SECRET = "client_secret";
+    private final String GRANT_TYPE = "grant_type";
+    private final String SCOPE = "scope";
+    private final String OPENID = "openid";
+    private final String USERNAME = "username";
+    private final String PASSWORD = "password";
+    private final String INVALID_LOGIN = "Invalid Username Or Password";
+    private final String INVALID_LOGOUT = "Logout failure";
+    private final String REFRESH_TOKEN = "refresh_token";
+    private final String LOGGED_OUT = "Logged Out Successfully";
 
     @Override
     public LoginResponseDTO login(LoginDTO loginDTO) {
@@ -45,7 +63,7 @@ public class AuthServiceImpl implements AuthService {
         map.add(PASSWORD, loginDTO.getPassword());
         try {
             ResponseEntity<LoginResponseDTO> response = webClient.post()
-                    .uri(LOGIN_URI)
+                    .uri(loginUri)
                     .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                     .body(BodyInserters.fromFormData(map))
                     .retrieve()
@@ -53,12 +71,12 @@ public class AuthServiceImpl implements AuthService {
                     .block();
             return response.getBody();
         } catch (RuntimeException ex) {
-            throw new InvalidLoginException(INVALID_LOGIN, ex.getCause());
+            throw new InvalidUserNamePasswordException(INVALID_LOGIN, ex.getCause());
         }
     }
 
     @Override
-    public Response logout(TokenDTO tokenDTO) {
+    public Response logout(String refreshToken) {
 
         try {
             HttpHeaders headers = new HttpHeaders();
@@ -66,9 +84,9 @@ public class AuthServiceImpl implements AuthService {
             MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
             requestBody.add(CLIENT_ID, clientId);
             requestBody.add(CLIENT_SECRET, clientSecret);
-            requestBody.add(REFRESH_TOKEN, tokenDTO.getToken());
+            requestBody.add(REFRESH_TOKEN, refreshToken);
             ClientResponse response = webClient.post()
-                    .uri(LOGOUT_API)
+                    .uri(logoutUri)
                     .headers(httpHeaders -> httpHeaders.addAll(headers))
                     .accept(MediaType.TEXT_HTML)
                     .body(BodyInserters.fromFormData(requestBody))
@@ -83,24 +101,5 @@ public class AuthServiceImpl implements AuthService {
         } catch (RuntimeException exception) {
             throw new LogoutFailureException(INVALID_LOGOUT, exception.getCause());
         }
-    }
-
-    @Override
-    public IntrospectResponse introspect(TokenDTO tokenDTO) {
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-        map.add(CLIENT_ID, clientId);
-        map.add(CLIENT_SECRET, clientSecret);
-        map.add(TOKEN, tokenDTO.getToken());
-        ResponseEntity<IntrospectResponse> response = webClient.post()
-                .uri(INTROSPECT_API)
-                .headers(httpHeaders -> httpHeaders.addAll(headers))
-                .bodyValue(map)
-                .retrieve()
-                .toEntity(IntrospectResponse.class)
-                .block();
-        return response.getBody();
     }
 }

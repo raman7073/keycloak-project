@@ -1,7 +1,7 @@
 package com.fiftyfive.authserver.exceptionhandler;
 
 import com.fiftyfive.authserver.exceptions.ErrorDetails;
-import com.fiftyfive.authserver.exceptions.InvalidLoginException;
+import com.fiftyfive.authserver.exceptions.InvalidUserNamePasswordException;
 import com.fiftyfive.authserver.exceptions.LogoutFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,23 +17,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.fiftyfive.authserver.commons.Constants.INVALID_LOGIN;
-import static com.fiftyfive.authserver.commons.Constants.INVALID_LOGOUT;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @ControllerAdvice
 public class AuthExceptionHandler {
-    @ExceptionHandler(InvalidLoginException.class)
-    public ResponseEntity<ErrorDetails> handleInvalidLoginException(InvalidLoginException exception,
-                                                                    WebRequest webRequest) {
+    @ExceptionHandler(InvalidUserNamePasswordException.class)
+    public ResponseEntity<ErrorDetails> handleInvalidUserNamePasswordException(InvalidUserNamePasswordException exception,
+                                                                               WebRequest webRequest) {
 
         ErrorDetails errorDetails = new ErrorDetails(
                 LocalDateTime.now(),
                 exception.getMessage(),
-                webRequest.getDescription(false),
-                INVALID_LOGIN
+                webRequest.getDescription(false)
         );
-        return new ResponseEntity<>(errorDetails, HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(LogoutFailureException.class)
@@ -44,8 +41,7 @@ public class AuthExceptionHandler {
         ErrorDetails errorDetails = new ErrorDetails(
                 LocalDateTime.now(),
                 exception.getMessage(),
-                webRequest.getDescription(false),
-                INVALID_LOGOUT
+                webRequest.getDescription(false)
         );
         return new ResponseEntity<>(errorDetails, HttpStatus.METHOD_FAILURE);
     }
@@ -58,8 +54,7 @@ public class AuthExceptionHandler {
         ErrorDetails errorDetails = new ErrorDetails(
                 LocalDateTime.now(),
                 exception.getMessage(),
-                webRequest.getDescription(false),
-                INTERNAL_SERVER_ERROR.toString()
+                webRequest.getDescription(false)
         );
         return new ResponseEntity<>(errorDetails, INTERNAL_SERVER_ERROR);
     }

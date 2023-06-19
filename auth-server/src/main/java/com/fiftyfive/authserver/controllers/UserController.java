@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
     @GetMapping
     public ResponseEntity<String> getUser(){
+
         return new ResponseEntity<String>("Getting You All Users", HttpStatus.OK);
     }
 
