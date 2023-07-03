@@ -21,7 +21,7 @@ public class CustomUserStorageProvider implements UserStorageProvider,
     private KeycloakSession session;
     private ComponentModel model;
     private UsersApiService usersApiService;
-    protected Map<String, UserModel> loadedUsers = new HashMap<>();
+    protected HashMap<String, UserModel> loadedUsers = new HashMap<>();
 
     public CustomUserStorageProvider(KeycloakSession session, ComponentModel model,
                                      UsersApiService usersApiService) {
@@ -81,9 +81,9 @@ public class CustomUserStorageProvider implements UserStorageProvider,
 
     @Override
     public Stream<UserModel> searchForUserStream(RealmModel realm, String search) {
+
         List<User> userList = usersApiService.getAllUsers();
-        userList.forEach(user ->
-                loadedUsers.put(user.getUsername(), new UserAdapter(session, realm, model, user)));
+        userList.forEach(user -> loadedUsers.put(user.getUsername(), createAdapter(realm, user)));
         return userList.stream()
                 .filter(user -> search.equalsIgnoreCase("*") || user.getUsername().contains(search))
                 .map(user -> createAdapter(realm, user));

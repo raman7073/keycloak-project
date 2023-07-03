@@ -1,17 +1,16 @@
 package com.fiftyfive.keycloak;
 
 public class User {
-    private String id;
+
     private String username;
     private String email;
     private String firstName;
     private String lastName;
     private String password;
 
-    public User(String id, String username, String email, String firstName,
-                                                          String lastName,
-                                                          String password) {
-        this.id = id;
+    public User(String username, String email, String firstName,
+                String lastName,
+                String password) {
         this.username = username;
         this.email = email;
         this.firstName = firstName;
@@ -19,13 +18,6 @@ public class User {
         this.password = password;
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 
     public String getUsername() {
         return username;

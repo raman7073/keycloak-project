@@ -1,18 +1,23 @@
 package com.fiftyfive.keycloak;
 
 import org.keycloak.component.ComponentModel;
+import org.keycloak.credential.LegacyUserCredentialManager;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
+import org.keycloak.models.SubjectCredentialManager;
+import org.keycloak.storage.StorageId;
 import org.keycloak.storage.adapter.AbstractUserAdapterFederatedStorage;
 
 public class UserAdapter extends AbstractUserAdapterFederatedStorage {
     private User user;
 
 
-    public UserAdapter(KeycloakSession session, RealmModel realm, ComponentModel model, User user) {
+    public UserAdapter(KeycloakSession session, RealmModel realm, ComponentModel model,
+                       User user) {
 
         super(session, realm, model);
         this.user = user;
+        this.storageId = new StorageId(storageProviderModel.getId(), user.getUsername());
     }
 
     @Override
@@ -20,6 +25,7 @@ public class UserAdapter extends AbstractUserAdapterFederatedStorage {
 
         return user.getUsername();
     }
+
 
     @Override
     public void setUsername(String username) {
@@ -43,5 +49,10 @@ public class UserAdapter extends AbstractUserAdapterFederatedStorage {
     public String getEmail() {
 
         return user.getEmail();
+    }
+
+    @Override
+    public SubjectCredentialManager credentialManager() {
+        return new LegacyUserCredentialManager(session, realm, this);
     }
 }

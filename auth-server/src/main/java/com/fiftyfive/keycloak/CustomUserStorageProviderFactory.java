@@ -21,6 +21,7 @@ public class CustomUserStorageProviderFactory implements
 
     @Override
     public String getId() {
+
         return PROVIDER_NAME;
     }
 }

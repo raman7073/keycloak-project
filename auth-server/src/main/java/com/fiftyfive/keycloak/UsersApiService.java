@@ -33,7 +33,7 @@ public class UsersApiService {
             String lastName = node.has(LASTNAME) ? node.get(LASTNAME).asText() : null;
             String email = node.has(EMAIL) ? node.get(EMAIL).asText() : null;
             String password = node.has(PASSWORD) ? node.get(PASSWORD).asText() : null;
-            User user = new User(id, username1, email, firstName, lastName, password);
+            User user = new User( username1, email, firstName, lastName, password);
             return user;
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -52,7 +52,7 @@ public class UsersApiService {
                 String lastName = node.has(LASTNAME) ? node.get(LASTNAME).asText() : null;
                 String email = node.has(EMAIL) ? node.get(EMAIL).asText() : null;
                 String password = node.has(PASSWORD) ? node.get(PASSWORD).asText() : null;
-                User user = new User(id, username, email, firstName, lastName, password);
+                User user = new User( username, email, firstName, lastName, password);
                 userList.add(user);
             }
             return userList;
