@@ -1,4 +1,4 @@
-package com.fiftyfive.authserver;
+package com.fiftyfive.keycloak;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
